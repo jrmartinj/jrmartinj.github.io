@@ -3,142 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizador de Viajes</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Travel Organizer</title>
     <style>
-        /* Estilos anteriores... */
-        
-        .hidden {
+        :root {
+            --primary: #007AFF;
+            --background: #f5f5f9;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Lista de viajes */
+        .trips-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .trip-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Navegación entre pestañas */
+        .tabs {
+            display: none; /* Oculto inicialmente */
+            position: relative;
+            margin-top: 2rem;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
             display: none;
+            padding: 2rem 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Formulario nuevo viaje */
+        .add-trip-form {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 500px;
+            margin: 2rem auto;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        button.primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .trips-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tab-nav {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Vista Principal -->
-        <div id="mainView" class="view active">
+        <!-- Lista principal de viajes -->
+        <div id="mainView">
             <div class="add-trip-form">
-                <h2><i class="fas fa-plus-circle"></i> Nuevo Viaje</h2>
-                <input type="text" id="tripName" placeholder="Nombre del viaje">
-                <input type="date" id="startDate" required>
-                <input type="date" id="endDate" required>
-                <button class="primary" onclick="addTrip()"><i class="fas fa-plus"></i> Crear Viaje</button>
+                <h2>Nuevo Viaje</h2>
+                <div class="input-group">
+                    <input type="text" id="tripName" placeholder="Nombre del viaje">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="tripDate" placeholder="Fechas (ej: 15-20 Oct 2024)">
+                </div>
+                <button class="primary" onclick="addTrip()">Crear Viaje</button>
             </div>
 
-            <div class="trips-list" id="tripsList">
-                <!-- Mensaje si no hay viajes -->
-                <div id="noTripsMessage" class="hidden">
-                    <p>No hay viajes creados. ¡Empieza añadiendo uno!</p>
-                </div>
-            </div>
+            <div class="trips-list" id="tripsList"></div>
         </div>
 
-        <!-- Vista Detalle del Viaje -->
-        <div id="detailView" class="view hidden">
-            <!-- Contenido detalle... -->
+        <!-- Vista detalle del viaje -->
+        <div class="tabs" id="tripView">
+            <div class="tab-nav" id="tabNav"></div>
+            
+            <div class="tab-content" id="resumen">
+                <h2>Resumen del Viaje</h2>
+                <p id="tripDetails"></p>
+            </div>
+
+            <div class="tab-content" id="porHacer">
+                <h2>Lista de Tareas</h2>
+                <!-- Contenido para tareas -->
+            </div>
+
+            <div class="tab-content" id="packing">
+                <h2>Packing List</h2>
+                <!-- Contenido para packing list -->
+            </div>
+
+            <div class="tab-content" id="apps">
+                <h2>Aplicaciones Recomendadas</h2>
+                <!-- Grid de apps -->
+            </div>
+
+            <div class="tab-content" id="reservas">
+                <h2>Reservas</h2>
+                <!-- Gestión de reservas -->
+            </div>
+
+            <div class="tab-content" id="horarios">
+                <h2>Horarios de Transporte</h2>
+                <!-- Gestión de horarios -->
+            </div>
+
+            <div class="tab-content" id="guias">
+                <h2>Guías de Viaje</h2>
+                <!-- Contenido para guías -->
+            </div>
         </div>
     </div>
 
     <script>
-        // Polyfill para Safari
-        if (!Date.prototype.toISOString) {
-            Date.prototype.toISOString = function() {
-                function pad(n) { return n < 10 ? '0' + n : n; }
-                return this.getUTCFullYear() + '-' +
-                    pad(this.getUTCMonth() + 1) + '-' +
-                    pad(this.getUTCDate());
-            };
-        }
+        let currentTrip = null;
+        const tabs = ['resumen', 'porHacer', 'packing', 'apps', 'reservas', 'horarios', 'guias'];
+        
+        // Cargar viajes desde localStorage
+        let trips = JSON.parse(localStorage.getItem('trips')) || [];
 
-        // Función mejorada para cargar viajes
-        function loadTrips() {
-            try {
-                const storedTrips = localStorage.getItem('trips');
-                trips = storedTrips ? JSON.parse(storedTrips) : [];
-                
-                // Validación de estructura
-                if (!Array.isArray(trips)) {
-                    throw new Error('Formato de datos inválido');
-                }
-            } catch (error) {
-                console.error('Error cargando viajes:', error);
-                trips = [];
-                localStorage.setItem('trips', JSON.stringify(trips));
-            }
-        }
-
-        // Función mejorada para renderizar viajes
         function renderTrips() {
             const list = document.getElementById('tripsList');
-            const noTripsMsg = document.getElementById('noTripsMessage');
-            
-            loadTrips(); // Cargar datos actualizados
-            
-            if (trips.length === 0) {
-                noTripsMsg.classList.remove('hidden');
-                list.innerHTML = '';
-                return;
-            }
-            
-            noTripsMsg.classList.add('hidden');
             list.innerHTML = trips.map((trip, index) => `
-                <div class="trip-card">
-                    <button class="delete-btn" onclick="deleteTrip(${index})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    <div onclick="showDetail(${index})">
-                        <h3>${trip.name}</h3>
-                        <p>${new Date(trip.startDate).toLocaleDateString('es-ES')} - 
-                           ${new Date(trip.endDate).toLocaleDateString('es-ES')}</p>
-                        ${trip.cities?.length ? `<p>Ciudades: ${trip.cities.join(', ')}</p>` : ''}
-                    </div>
+                <div class="trip-card" onclick="showTrip(${index})">
+                    <h3>${trip.name}</h3>
+                    <p>${trip.date}</p>
                 </div>
             `).join('');
         }
 
-        // Función mejorada para añadir viajes
         function addTrip() {
-            try {
-                const name = document.getElementById('tripName').value;
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
+            const name = document.getElementById('tripName').value;
+            const date = document.getElementById('tripDate').value;
+            
+            if(name && date) {
+                trips.push({ 
+                    name, 
+                    date,
+                    tasks: [],
+                    packing: [],
+                    reservations: [],
+                    schedule: []
+                });
                 
-                if (!name || !startDate || !endDate) {
-                    throw new Error('Por favor completa todos los campos');
-                }
-
-                const newTrip = {
-                    name,
-                    startDate: new Date(startDate).toISOString().split('T')[0],
-                    endDate: new Date(endDate).toISOString().split('T')[0],
-                    cities: []
-                };
-
-                trips.push(newTrip);
                 localStorage.setItem('trips', JSON.stringify(trips));
                 renderTrips();
-                
-                // Resetear formulario
                 document.getElementById('tripName').value = '';
-                document.getElementById('startDate').value = '';
-                document.getElementById('endDate').value = '';
-                
-            } catch (error) {
-                alert(error.message);
-                console.error('Error añadiendo viaje:', error);
+                document.getElementById('tripDate').value = '';
             }
         }
 
-        // Inicialización mejorada
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTrips();
-            renderTrips();
+        function showTrip(index) {
+            currentTrip = index;
+            document.getElementById('mainView').style.display = 'none';
+            document.getElementById('tripView').style.display = 'block';
             
-            // Inicializar fechas
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').value = today;
-            document.getElementById('endDate').value = today;
-        });
+            // Actualizar detalles del viaje
+            document.getElementById('tripDetails').textContent = 
+                `${trips[index].name} - ${trips[index].date}`;
+            
+            // Generar navegación de pestañas
+            const tabNav = document.getElementById('tabNav');
+            tabNav.innerHTML = tabs.map(tab => `
+                <button class="tab-button" onclick="showTab('${tab}')">
+                    ${tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+            `).join('');
+            
+            showTab('resumen');
+        }
+
+        function showTab(tabId) {
+            // Remover clase active de todos los botones
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Añadir active al botón seleccionado
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`)
+                .classList.add('active');
+            
+            // Mostrar contenido correspondiente
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Inicialización
+        renderTrips();
     </script>
 </body>
 </html>
