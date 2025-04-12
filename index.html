@@ -11,18 +11,20 @@
     <div class="container">
         <!-- Vista Principal -->
         <div id="mainView" class="view active">
+            <!-- Lista de Viajes -->
+            <div class="trips-list" id="tripsList">
+                <div id="noTripsMessage" class="hidden">
+                    <p>No hay viajes creados. ¡Empieza añadiendo uno!</p>
+                </div>
+            </div>
+
+            <!-- Formulario Creación -->
             <div class="add-trip-form">
                 <h2><i class="fas fa-plus-circle"></i> Nuevo Viaje</h2>
                 <input type="text" id="tripName" placeholder="Nombre del viaje">
                 <input type="date" id="startDate" required>
                 <input type="date" id="endDate" required>
                 <button class="primary" onclick="app.addTrip()"><i class="fas fa-plus"></i> Crear Viaje</button>
-            </div>
-
-            <div class="trips-list" id="tripsList">
-                <div id="noTripsMessage" class="hidden">
-                    <p>No hay viajes creados. ¡Empieza añadiendo uno!</p>
-                </div>
             </div>
         </div>
 
